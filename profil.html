@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>motoGYM – Profil</title>
+  <link rel="stylesheet" href="./css/profil.css">
+</head>
+<body>
+
+  <div class="profile-container">
+    <h1>Twój profil</h1>
+    <div id="userInfo">Ładowanie...</div>
+    <button id="logoutBtn">Wyloguj się</button>
+
+    <div class="profile-links">
+    <a href="index.html" class="home-link">🏠 Strona główna</a>
+    </div>
+
+    <div class="results-section">
+      <h2>Twoje wyniki</h2>
+      <p id="resultsStatus" class="loading">Ładowanie wyników...</p>
+      <ul id="resultsList"></ul>
+    </div>
+  </div>
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module">
+    import { initializeProfile } from './js/profil.js';
+    initializeProfile();
+  </script>
+
+</body>
+</html>

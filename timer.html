@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>motoGYM - Tryb Solo</title>
+  <link rel="stylesheet" href="./css/timer.css">
+</head>
+<body>
+  <h1>motoGYM - Tryb Solo</h1>
+
+  <div class="profile-links">
+    <a href="index.html" class="home-link">🏠 Strona główna</a>
+    <a href="profil.html">👤 Twój profil</a>
+    <a href="profil.html#twoje-wyniki">📊 Twoje wyniki</a>
+    <a href="wm.html" class="home-link">🤸‍♂️ WheelieMeter</a>
+  </div>
+
+  <div id="userInfo">
+    Zalogowany jako: <span id="userEmail"></span>
+    <button id="logoutBtn">Wyloguj się</button>
+  </div>
+
+  <div>
+    <label for="trackSelect">Wybierz trasę:</label>
+    <select id="trackSelect">
+      <option value="Gymkhanowa">Gymkhanowa</option>
+      <option value="Ósemka">Ósemka</option>
+      <option value="Slalom A">Slalom A</option>
+      <option value="Testowa">Testowa</option>
+    </select>
+  </div>
+
+  <div class="time-display" id="timer">00:00.00</div>
+  
+  <div class="controls">
+    <button class="btn-start">Start</button>
+    <button class="btn-stop">Stop</button>
+    <button class="btn-reset">Reset</button>
+    <button class="btn-save">💾 Zapisz wynik</button>
+    <button class="btn-export">📤 Eksportuj dziennik</button>
+    <button class="btn-upload">Wyślij zaznaczone</button>
+  </div>
+
+  <div class="log">
+    <h2>Dziennik treningowy</h2>
+    <ul id="log"></ul>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module">
+    import { initializeTimer } from './js/timer.js';
+    initializeTimer();
+  </script>
+</body>
+</html>
