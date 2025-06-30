@@ -1,0 +1,127 @@
+/* Główne style */
+body {
+  font-family: Arial, sans-serif;
+  background: #121212;
+  color: #fff;
+  text-align: center;
+  padding: 20px;
+  margin: 0;
+}
+
+/* Style przycisków - najważniejsze zmiany */
+button {
+  font-size: 18px;
+  padding: 10px 20px;
+  margin: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-start {
+  background: #28a745;
+  color: white;
+}
+
+.btn-stop {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-reset {
+  background: #ffc107;
+  color: #000;
+}
+
+.btn-save,
+.btn-export,
+.btn-upload {
+  background: #007bff;
+  color: white;
+}
+
+/* Efekty hover */
+button:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+/* Pozostałe style */
+.profile-links {
+  margin-bottom: 20px;
+}
+
+.profile-links a {
+  color: #00aaff;
+  margin-right: 15px;
+  text-decoration: none;
+}
+
+.profile-links a:hover {
+  text-decoration: underline;
+}
+
+#userInfo {
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.time-display {
+  font-size: 48px;
+  margin: 30px 0;
+  font-family: monospace;
+}
+
+select {
+  padding: 8px 12px;
+  font-size: 16px;
+  border-radius: 6px;
+  background: #333;
+  color: white;
+  border: 1px solid #444;
+}
+
+.log {
+  margin-top: 30px;
+  text-align: left;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  background: #1a1a1a;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.log-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin: 8px 0;
+  background: #252525;
+  border-radius: 6px;
+}
+
+.upload-checkbox {
+  margin-left: 10px;
+}
+
+/* Responsywność */
+@media (max-width: 600px) {
+  .time-display {
+    font-size: 36px;
+  }
+  
+  button {
+    font-size: 16px;
+    padding: 8px 16px;
+  }
+  
+  .log-entry {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+}

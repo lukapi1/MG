@@ -1,0 +1,94 @@
+/* Główne style strony profilu */
+body {
+  font-family: Arial, sans-serif;
+  background: #121212;
+  color: #fff;
+  padding: 20px;
+  margin: 0;
+}
+
+h1 {
+  margin-bottom: 10px;
+  color: #ffffff;
+}
+
+#userInfo {
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #cccccc;
+}
+
+button {
+  padding: 8px 14px;
+  background: #444;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background: #555;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+li {
+  background: #1e1e1e;
+  margin: 8px 0;
+  padding: 12px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.profile-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.results-section {
+  margin-top: 30px;
+  background: #1a1a1a;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.track-name {
+  font-weight: bold;
+  color: #4CAF50;
+}
+
+.result-time {
+  color: #2196F3;
+}
+
+/* Animacje ładowania */
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.loading {
+    animation: pulse 1.5s infinite;
+    color: #aaa;
+    font-style: italic;
+}
+
+/* Dodatkowe style dla responsywności */
+@media (max-width: 600px) {
+  body {
+    padding: 15px;
+  }
+  
+  li {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
