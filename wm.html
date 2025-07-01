@@ -35,12 +35,15 @@
         <button id="calibrateBtn" class="small-button">KALIBRUJ</button>
         <button id="themeBtn" class="small-button">TRYB JASNY</button>
       </div>
-      
+
       <div class="controls-row">
-        <button id="startBtn">START</button>
+        <button id="sessionBtn">START SESJI</button>
+        <button id="endSessionBtn" class="small-button" disabled>KONIEC SESJI</button>
         <button id="resetBtn" disabled>RESET</button>
         <button id="saveBtn" disabled>ZAPISZ</button>
       </div>
+
+      <div id="session-time-display" style="font-size: 1.2rem; margin: 10px 0;">Czas sesji: 00:00:00</div>
     </div>
     
     <div class="history-wrapper">
@@ -58,7 +61,6 @@
     <button id="logoutBtn">Wyloguj się</button>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script type="module">
     import { initializeWheelieMeter } from './js/wm.js';
     initializeWheelieMeter();
