@@ -117,7 +117,6 @@ async function init() { // Dodane async
  * Rozpoczyna pomiar
  */
 function toggleMeasurement() {
-  // Usunięte pytanie o nick - używamy danych z logowania
   if (!state.user) {
     showNotification("Musisz być zalogowany", "error");
     return;
@@ -304,7 +303,6 @@ function updateDisplay(angle) {
 
   elements.gaugeFill.style.width = Math.min(fillPercentage, 100) + "%";
 
-  // Reszta funkcji bez zmian (kolory, statusy itd.)
   if (angle >= config.dangerThreshold) {
     elements.angleDisplay.style.color = "var(--primary-color)";
     elements.status.textContent = "UWAGA! ZBYT DUŻY KĄT!";
