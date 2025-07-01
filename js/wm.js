@@ -502,6 +502,16 @@ function startTrainingSession() {
     return;
   }
 
+  // Sprawdzenie czy wykonano kalibrację
+  if (state.calibrationOffset === null || state.calibrationOffset === undefined) {
+    showNotification("Najpierw wykonaj kalibrację!", "error");
+    elements.calibrateBtn.classList.add('calibrating');
+    setTimeout(() => {
+      elements.calibrateBtn.classList.remove('calibrating');
+    }, 2000);
+    return;
+  }
+
   // Standardowe rozpoczynanie pomiaru
   state.isSessionActive = true;
   state.isMeasuring = true;
@@ -509,7 +519,6 @@ function startTrainingSession() {
   elements.resetBtn.disabled = false;
   elements.status.textContent = "Czekam na wheelie...";
 
-  // Nowa funkcjonalność sesji
   state.isTrainingSession = true;
   state.sessionStartTime = Date.now();
   state.sessionId = generateSessionId();
