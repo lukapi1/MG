@@ -30,7 +30,9 @@ const state = {
   isTrainingSession: false,
   sessionStartTime: 0,
   sessionTimer: null,
-  sessionDuration: 0
+  sessionDuration: 0,
+  isCalibrating: false,
+  hasBeenCalibrated: false,
 };
 
 /**
@@ -78,6 +80,7 @@ async function init() {
   state.user = session.user;
   elements.userEmail.textContent = session.user.email;
 
+  // Inicjalizacja przycisków
   elements.resetBtn.addEventListener('click', resetSession);
   elements.saveBtn.addEventListener('click', saveSession);
   elements.calibrateBtn.addEventListener('click', calibrate);
@@ -93,7 +96,7 @@ async function init() {
 
   if (!window.DeviceOrientationEvent) {
     elements.status.textContent = "Twoje urządzenie nie wspiera czujników orientacji";
-    elements.startBtn.disabled = true;
+    elements.sessionBtn.disabled = true;
     return;
   }
 
@@ -102,6 +105,7 @@ async function init() {
     elements.sessionBtn.addEventListener('click', () => {
       requestPermission().then(granted => {
         if (granted) {
+          setupSensor(); // Dodajemy to!
           elements.sessionBtn.textContent = "START SESJI";
           elements.sessionBtn.removeEventListener('click', requestPermission);
           elements.sessionBtn.addEventListener('click', startTrainingSession);
@@ -109,15 +113,12 @@ async function init() {
       });
     });
   } else {
+    setupSensor(); // Dodajemy to dla innych przeglądarek
     elements.sessionBtn.addEventListener('click', startTrainingSession);
   }
   
   elements.endSessionBtn.addEventListener('click', endTrainingSession);
-
-  if (!localStorage.getItem('wmHelpShown')) {
-    document.getElementById('help-modal').style.display = 'block';
-    localStorage.setItem('wmHelpShown', 'true');
-  }
+  elements.status.textContent = "Wykonaj kalibrację przed rozpoczęciem sesji";
 }
 
 /**
@@ -149,12 +150,14 @@ function resetSession() {
     // Resetuj stan
     state.isSessionActive = false;
     state.isMeasuring = false;
-    state.isWheelie = false;
     state.isTrainingSession = false;
-    state.measurements = [];
-    state.unsavedResults = null;
     state.sessionDuration = 0;
     state.sessionId = generateSessionId();
+    state.calibrationOffset = 0; // Resetujemy kalibrację
+    state.hasBeenCalibrated = false; // RESETUJEMY FLAGĘ
+    
+    // Resetuj stan pomiarów
+    resetMeasurementState();
     
     // Zresetuj interfejs
     elements.history.innerHTML = "";
@@ -164,9 +167,10 @@ function resetSession() {
     elements.endSessionBtn.disabled = true;
     elements.resetBtn.disabled = true;
     elements.saveBtn.disabled = true;
-    elements.status.textContent = "Gotowy do pomiaru";
+    elements.status.textContent = "Gotowy do pomiaru. Wykonaj kalibrację.";
     elements.angleDisplay.textContent = "0°";
     elements.gaugeFill.style.width = "0%";
+    updateCalibrationDisplay();
   }
 }
 
@@ -249,19 +253,30 @@ async function handleLogout() {
  * Kalibruje czujnik
  */
 function calibrate() {
-  if (state.currentAngle !== null) {
-    state.calibrationOffset = state.currentAngle;
-    updateCalibrationDisplay();
-    saveSettings();
-    
-    // Dodajemy informację o kalibracji podczas pomiaru
-    if (state.isMeasuring) {
-      elements.status.textContent = "Wykalibrowano podczas pomiaru! Aktualny kąt: " + 
-        (state.currentAngle - state.calibrationOffset).toFixed(1) + "°";
+  // Tymczasowo włączamy pomiar tylko na czas kalibracji
+  const wasMeasuring = state.isMeasuring;
+  state.isMeasuring = true;
+  
+  // Czekamy na aktualny odczyt z czujnika
+  setTimeout(() => {
+    if (state.currentAngle !== null) {
+      state.calibrationOffset = state.currentAngle;
+      state.hasBeenCalibrated = true;
+      updateCalibrationDisplay();
+      
+      elements.status.textContent = `Wykalibrowano (offset: ${state.calibrationOffset.toFixed(1)}°)`;
+      showNotification("Kalibracja wykonana pomyślnie", "success");
+      
+      // Przywracamy poprzedni stan pomiaru
+      state.isMeasuring = wasMeasuring;
+      
+      // Włączamy przycisk startu sesji
+      elements.sessionBtn.disabled = false;
     } else {
-      elements.status.textContent = "Wykalibrowano do aktualnej pozycji";
+      elements.status.textContent = "Błąd kalibracji - brak danych z czujnika";
+      state.isMeasuring = wasMeasuring;
     }
-  }
+  }, 100);
 }
 
 /**
@@ -303,14 +318,20 @@ function setupSensor() {
  * Obsługuje dane z czujnika
  */
 function handleOrientation(event) {
-  if (!state.isMeasuring) return;
+  if (!state.isMeasuring && !state.isCalibrating) return;
   
   let angle = Math.abs(event.beta);
-  angle = Math.abs(angle - state.calibrationOffset);
+  if (angle > 90) angle = 180 - angle; // Poprawiamy zakres dla niektórych urządzeń
   state.currentAngle = angle;
   
-  updateDisplay(angle);
-  checkWheelie(angle);
+  // Jeśli nie jesteśmy w trakcie sesji, pokazujemy surowy kąt
+  if (!state.isSessionActive) {
+    elements.angleDisplay.textContent = angle.toFixed(1) + "°";
+  } else {
+    angle = Math.abs(angle - state.calibrationOffset);
+    updateDisplay(angle);
+    checkWheelie(angle);
+  }
 }
 
 /**
@@ -456,13 +477,9 @@ function loadSettings() {
   const savedTheme = localStorage.getItem('wheelieMeterTheme');
   if (savedTheme === 'light') enableLightMode();
   
-  const savedCalibration = localStorage.getItem('wheelieMeterCalibration');
-  if (savedCalibration) {
-    state.calibrationOffset = parseFloat(savedCalibration);
-    updateCalibrationDisplay();
-  } else {
-    state.calibrationOffset = null; // Ustawiamy null jeśli nie ma zapisanej kalibracji
-  }
+  // Resetujemy kalibrację przy każdym ładowaniu
+  state.calibrationOffset = 0;
+  updateCalibrationDisplay();
 }
 
 /**
@@ -495,7 +512,7 @@ function showNotification(message, type = 'info') {
  */
 function saveSettings() {
   localStorage.setItem('wheelieMeterTheme', state.isLightMode ? 'light' : 'dark');
-  localStorage.setItem('wheelieMeterCalibration', state.calibrationOffset.toString());
+  // Nie zapisujemy już kalibracji
 }
 
 function startTrainingSession() {
@@ -504,8 +521,8 @@ function startTrainingSession() {
     return;
   }
 
-  // Sprawdzenie czy wykonano kalibrację
-  if (state.calibrationOffset === null || state.calibrationOffset === undefined) {
+  // SPRAWDZENIE FLAGI
+  if (!state.hasBeenCalibrated) {
     showNotification("Najpierw wykonaj kalibrację!", "error");
     elements.calibrateBtn.classList.add('calibrating');
     setTimeout(() => {
@@ -514,22 +531,38 @@ function startTrainingSession() {
     return;
   }
 
-  // Standardowe rozpoczynanie pomiaru
+  // Rozpoczynamy sesję
   state.isSessionActive = true;
   state.isMeasuring = true;
-  elements.sessionBtn.disabled = true;
-  elements.resetBtn.disabled = false;
-  elements.status.textContent = "Czekam na wheelie...";
-
   state.isTrainingSession = true;
   state.sessionStartTime = Date.now();
   state.sessionId = generateSessionId();
   
-  // Rozpoczęcie timera sesji
+  // Resetujemy stan pomiarów
+  resetMeasurementState();
+  
+  // Aktualizujemy interfejs
+  elements.sessionBtn.disabled = true;
+  elements.resetBtn.disabled = false;
+  elements.saveBtn.disabled = true;
+  elements.status.textContent = "Czekam na wheelie...";
+  
+  // Rozpoczynamy timer sesji
   state.sessionTimer = setInterval(updateSessionTimer, 1000);
   elements.endSessionBtn.disabled = false;
   
   showNotification("Sesja treningowa rozpoczęta", "success");
+}
+
+// Dodajemy nową funkcję pomocniczą do resetowania stanu pomiarów
+function resetMeasurementState() {
+  state.measurements = [];
+  state.unsavedResults = null;
+  state.wheelieAngles = [];
+  state.maxAngle = 0;
+  state.isWheelie = false;
+  state.startTime = 0;
+  state.currentAngle = 0;
 }
 
 function endTrainingSession() {
