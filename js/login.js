@@ -38,7 +38,7 @@ export function initializeLogin() {
         const { error } = await auth.signIn(email, password);
         if (error) throw error;
         message.textContent = '✅ Zalogowano pomyślnie!';
-        setTimeout(() => window.location.href = 'timer.html', 1000);
+        setTimeout(() => window.location.href = 'index.html', 1000);
       } else {
         const { error } = await auth.signUp(email, password);
         if (error) throw error;

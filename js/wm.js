@@ -26,7 +26,11 @@ const state = {
   isLightMode: false,
   unsavedResults: null,
   wheelieAngles: [],
-  sessionId: generateSessionId()
+  sessionId: generateSessionId(),
+  isTrainingSession: false,
+  sessionStartTime: 0,
+  sessionTimer: null,
+  sessionDuration: 0
 };
 
 /**
@@ -46,22 +50,22 @@ const elements = {
   timeDisplay: document.getElementById('time-display'),
   status: document.getElementById('status'),
   gaugeFill: document.getElementById('gauge-fill'),
-  startBtn: document.getElementById('startBtn'),
   resetBtn: document.getElementById('resetBtn'),
   saveBtn: document.getElementById('saveBtn'),
   calibrateBtn: document.getElementById('calibrateBtn'),
   themeBtn: document.getElementById('themeBtn'),
   history: document.getElementById('history'),
-  calibrationValue: document.getElementById('calibration-value')
+  calibrationValue: document.getElementById('calibration-value'),
+  sessionBtn: document.getElementById('sessionBtn'),
+  endSessionBtn: document.getElementById('endSessionBtn'),
+  sessionTimeDisplay: document.getElementById('session-time-display')
 };
+
 
 /**
  * Inicjalizacja aplikacji
  */
-/**
- * Inicjalizacja aplikacji
- */
-async function init() { // Dodane async
+async function init() { 
   // Sprawdź czy użytkownik jest zalogowany
   const { data: { session }, error } = await auth.getSession();
   
@@ -78,7 +82,9 @@ async function init() { // Dodane async
   elements.saveBtn.addEventListener('click', saveSession);
   elements.calibrateBtn.addEventListener('click', calibrate);
   elements.themeBtn.addEventListener('click', toggleTheme);
-  elements.logoutBtn.addEventListener('click', handleLogout); // Dodane
+  elements.logoutBtn.addEventListener('click', handleLogout); 
+  elements.sessionBtn.addEventListener('click', startTrainingSession);
+  elements.endSessionBtn.addEventListener('click', endTrainingSession);
 
   elements.resetBtn.disabled = true;
   elements.saveBtn.disabled = true;
@@ -92,20 +98,21 @@ async function init() { // Dodane async
   }
 
   if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-    elements.startBtn.textContent = "DOTKNIJ ABY ZACZĄĆ";
-    elements.startBtn.addEventListener('click', () => {
+    elements.sessionBtn.textContent = "DOTKNIJ ABY ZACZĄĆ";
+    elements.sessionBtn.addEventListener('click', () => {
       requestPermission().then(granted => {
         if (granted) {
-          elements.startBtn.textContent = "START";
-          elements.startBtn.removeEventListener('click', requestPermission);
-          elements.startBtn.addEventListener('click', toggleMeasurement);
+          elements.sessionBtn.textContent = "START SESJI";
+          elements.sessionBtn.removeEventListener('click', requestPermission);
+          elements.sessionBtn.addEventListener('click', startTrainingSession);
         }
       });
     });
   } else {
-    setupSensor();
-    elements.startBtn.addEventListener('click', toggleMeasurement);
+    elements.sessionBtn.addEventListener('click', startTrainingSession);
   }
+  
+  elements.endSessionBtn.addEventListener('click', endTrainingSession);
 
   if (!localStorage.getItem('wmHelpShown')) {
     document.getElementById('help-modal').style.display = 'block';
@@ -134,15 +141,27 @@ function toggleMeasurement() {
  */
 function resetSession() {
   if (confirm("Czy na pewno chcesz zresetować sesję? Wyniki nie zostaną zapisane.")) {
+    // Zatrzymaj timer sesji jeśli aktywny
+    if (state.sessionTimer) {
+      clearInterval(state.sessionTimer);
+    }
+    
+    // Resetuj stan
     state.isSessionActive = false;
     state.isMeasuring = false;
     state.isWheelie = false;
+    state.isTrainingSession = false;
     state.measurements = [];
     state.unsavedResults = null;
-    state.sessionId = generateSessionId(); // Nowa sesja
+    state.sessionDuration = 0;
+    state.sessionId = generateSessionId();
+    
+    // Zresetuj interfejs
     elements.history.innerHTML = "";
     elements.timeDisplay.textContent = "0.00s";
-    elements.startBtn.disabled = false;
+    elements.sessionTimeDisplay.textContent = "Czas sesji: 00:00:00";
+    elements.sessionBtn.disabled = false;
+    elements.endSessionBtn.disabled = true;
     elements.resetBtn.disabled = true;
     elements.saveBtn.disabled = true;
     elements.status.textContent = "Gotowy do pomiaru";
@@ -155,6 +174,16 @@ function resetSession() {
  * Zapisuje wyniki do bazy danych
  */
 async function saveSession() {
+  if (!state.user?.id) {
+    showNotification("Błąd autoryzacji", "error");
+    return;
+  }
+  
+  if (state.measurements.some(m => m.angle > 90 || m.angle < 0)) {
+    showNotification("Nieprawidłowe wartości kątów", "error");
+    return;
+  }
+
   if (!state.user) {
     alert("Musisz być zalogowany, aby zapisywać wyniki!");
     return;
@@ -220,16 +249,18 @@ async function handleLogout() {
  * Kalibruje czujnik
  */
 function calibrate() {
-  if (state.isMeasuring) {
-    alert("Zatrzymaj pomiar przed kalibracją");
-    return;
-  }
-  
   if (state.currentAngle !== null) {
     state.calibrationOffset = state.currentAngle;
     updateCalibrationDisplay();
     saveSettings();
-    elements.status.textContent = "Wykalibrowano do aktualnej pozycji";
+    
+    // Dodajemy informację o kalibracji podczas pomiaru
+    if (state.isMeasuring) {
+      elements.status.textContent = "Wykalibrowano podczas pomiaru! Aktualny kąt: " + 
+        (state.currentAngle - state.calibrationOffset).toFixed(1) + "°";
+    } else {
+      elements.status.textContent = "Wykalibrowano do aktualnej pozycji";
+    }
   }
 }
 
@@ -457,36 +488,103 @@ function showNotification(message, type = 'info') {
   }, 4000);
 }
 
-// Nowa funkcja - wizualizacja bezpieczeństwa
-function updateSafetyVisuals(angle) {
-  if (angle >= config.dangerThreshold) {
-    document.body.style.backgroundColor = "rgba(255, 50, 50, 0.2)";
-    elements.angleDisplay.style.transform = "scale(1.1)";
-  } else {
-    document.body.style.backgroundColor = "";
-    elements.angleDisplay.style.transform = "";
-  }
-}
-
-function setupEventListeners() {
-  // ... istniejące event listeners ...
-  
-  elements.logoutBtn.addEventListener('click', async () => {
-    const { error } = await auth.signOut();
-    if (error) {
-      alert("Błąd podczas wylogowania: " + error.message);
-    } else {
-      window.location.href = "login.html";
-    }
-  });
-}
-
 /**
  * Zapisuje ustawienia
  */
 function saveSettings() {
   localStorage.setItem('wheelieMeterTheme', state.isLightMode ? 'light' : 'dark');
   localStorage.setItem('wheelieMeterCalibration', state.calibrationOffset.toString());
+}
+
+function startTrainingSession() {
+  if (!state.user) {
+    showNotification("Musisz być zalogowany", "error");
+    return;
+  }
+
+  // Standardowe rozpoczynanie pomiaru
+  state.isSessionActive = true;
+  state.isMeasuring = true;
+  elements.sessionBtn.disabled = true;
+  elements.resetBtn.disabled = false;
+  elements.status.textContent = "Czekam na wheelie...";
+
+  // Nowa funkcjonalność sesji
+  state.isTrainingSession = true;
+  state.sessionStartTime = Date.now();
+  state.sessionId = generateSessionId();
+  
+  // Rozpoczęcie timera sesji
+  state.sessionTimer = setInterval(updateSessionTimer, 1000);
+  elements.endSessionBtn.disabled = false;
+  
+  showNotification("Sesja treningowa rozpoczęta", "success");
+}
+
+function endTrainingSession() {
+  if (!state.isTrainingSession) return;
+
+  // Zatrzymanie timera sesji
+  clearInterval(state.sessionTimer);
+  
+  // Zatrzymanie pomiarów
+  state.isMeasuring = false;
+  state.isTrainingSession = false;
+  
+  // Przygotowanie danych sesji do zapisu
+  const sessionData = {
+    duration: state.sessionDuration,
+    startTime: new Date(state.sessionStartTime),
+    endTime: new Date(),
+    measurementsCount: state.measurements.length,
+    maxAngle: Math.max(...state.measurements.map(m => m.angle))
+  };
+  
+  // Aktualizacja interfejsu
+  elements.sessionBtn.disabled = false;
+  elements.endSessionBtn.disabled = true;
+  elements.status.textContent = `Sesja zakończona. Czas: ${formatTime(state.sessionDuration)}`;
+  
+  // Możliwość zapisu całej sesji
+  saveSessionData(sessionData);
+}
+
+function updateSessionTimer() {
+  state.sessionDuration = Math.floor((Date.now() - state.sessionStartTime) / 1000);
+  elements.sessionTimeDisplay.textContent = `Czas sesji: ${formatTime(state.sessionDuration)}`;
+}
+
+function formatTime(seconds) {
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+async function saveSessionData(sessionData) {
+  if (!state.user) {
+    showNotification("Musisz być zalogowany aby zapisać sesję", "error");
+    return;
+  }
+
+  try {
+    const { error } = await supabase.from('training_sessions').insert([{
+      user_id: state.user.id,
+      session_id: state.sessionId,
+      duration: sessionData.duration,
+      start_time: sessionData.startTime.toISOString(),
+      end_time: sessionData.endTime.toISOString(),
+      measurements_count: sessionData.measurementsCount,
+      max_angle: sessionData.maxAngle
+    }]);
+
+    if (error) throw error;
+
+    showNotification("Sesja zapisana pomyślnie", "success");
+  } catch (error) {
+    console.error("Błąd zapisu sesji:", error);
+    showNotification("Błąd podczas zapisywania sesji", "error");
+  }
 }
 
 // Inicjalizacja aplikacji
