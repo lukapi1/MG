@@ -460,6 +460,8 @@ function loadSettings() {
   if (savedCalibration) {
     state.calibrationOffset = parseFloat(savedCalibration);
     updateCalibrationDisplay();
+  } else {
+    state.calibrationOffset = null; // Ustawiamy null jeśli nie ma zapisanej kalibracji
   }
 }
 
