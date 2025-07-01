@@ -297,3 +297,38 @@ button:active {
   color: #ff3b30;
   font-weight: bold;
 }
+
+.calibrating {
+  animation: calibrate-pulse 0.5s;
+}
+
+@keyframes calibrate-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
+#session-time-display {
+  font-family: monospace;
+  color: var(--primary-color);
+  background-color: var(--history-bg);
+  padding: 8px;
+  border-radius: 8px;
+  margin: 15px auto;
+  width: fit-content;
+}
+
+#endSessionBtn {
+  background-color: var(--warning-color);
+  color: #000;
+}
+
+#sessionBtn {
+  background: var(--success-color);
+  flex: 2; /* Większy niż inne przyciski */
+}
+
+#sessionBtn:disabled {
+  opacity: 0.7;
+  background: var(--gauge-bg);
+}
