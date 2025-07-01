@@ -325,10 +325,20 @@ button:active {
 
 #sessionBtn {
   background: var(--success-color);
-  flex: 2; /* Większy niż inne przyciski */
+  flex: 1; /* Większy niż inne przyciski */
 }
 
 #sessionBtn:disabled {
   opacity: 0.7;
   background: var(--gauge-bg);
+}
+
+.calibrating {
+  animation: calibrate-pulse 0.5s infinite;
+}
+
+@keyframes calibrate-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
