@@ -16,6 +16,8 @@
     <a href="profil.html">👤 Profil</a>
   </div>
 
+  <div id="session-time-display" style="font-size: 1.2rem; margin: 10px 0;">Czas sesji: 00:00:00</div>
+
   <div id="container">
     <div class="content-wrapper">
       <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -39,11 +41,13 @@
       <div class="controls-row">
         <button id="sessionBtn">START SESJI</button>
         <button id="endSessionBtn" class="small-button" disabled>KONIEC SESJI</button>
+      </div>
+      <div class="controls-row">
         <button id="resetBtn" disabled>RESET</button>
         <button id="saveBtn" disabled>ZAPISZ</button>
       </div>
 
-      <div id="session-time-display" style="font-size: 1.2rem; margin: 10px 0;">Czas sesji: 00:00:00</div>
+      
     </div>
     
     <div class="history-wrapper">
