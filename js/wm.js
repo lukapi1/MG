@@ -155,7 +155,7 @@ function resetSession() {
     state.sessionId = generateSessionId();
     state.calibrationOffset = 0; // Resetujemy kalibrację
     state.hasBeenCalibrated = false; // RESETUJEMY FLAGĘ
-    
+
     // Resetuj stan pomiarów
     resetMeasurementState();
     
@@ -202,7 +202,9 @@ async function saveSession() {
     alert("Te wyniki już zostały zapisane.");
     return;
   }
-
+  elements.saveBtn.classList.add('saving');
+  // Po zapisie:
+  elements.saveBtn.classList.remove('saving');
   elements.saveBtn.disabled = true;
   elements.status.textContent = "Zapisywanie do bazy...";
 
@@ -486,6 +488,8 @@ function loadSettings() {
  * Pokazuje widoczny komunikat (powiadomienie)
  */
 function showNotification(message, type = 'info') {
+  const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+  notification.innerHTML = `${icon} ${message}`;
   const notification = document.createElement('div');
   notification.textContent = message;
   notification.style.position = 'fixed';
@@ -595,7 +599,7 @@ function endTrainingSession() {
 
 function updateSessionTimer() {
   state.sessionDuration = Math.floor((Date.now() - state.sessionStartTime) / 1000);
-  elements.sessionTimeDisplay.textContent = `Czas sesji: ${formatTime(state.sessionDuration)}`;
+  elements.sessionTimeDisplay.innerHTML = `Czas sesji: ${formatTime(state.sessionDuration)}`;
 }
 
 function formatTime(seconds) {
