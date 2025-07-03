@@ -26,7 +26,7 @@ const state = {
   isLightMode: false,
   unsavedResults: null,
   wheelieAngles: [],
-  sessionId: generateSessionId(),
+  sessionId: crypto.randomUUID(),
   isTrainingSession: false,
   sessionStartTime: 0,
   sessionTimer: null,
@@ -193,7 +193,7 @@ function resetSession() {
     // Zresetuj interfejs
     elements.history.innerHTML = "";
     elements.timeDisplay.textContent = "0.00s";
-    elements.sessionTimeDisplay.textContent = "SESJA: 00:00:00";
+    elements.sessionTimeDisplay.textContent = "SESJA 00:00:00";
     elements.sessionBtn.disabled = false;
     elements.endSessionBtn.disabled = true;
     elements.resetBtn.disabled = true;
@@ -248,7 +248,8 @@ async function saveSession() {
       duration: parseFloat(m.duration.toFixed(2)),
       max_angle: parseFloat(m.angle.toFixed(1)),
       session_name: state.sessionName,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      session_id: state.sessionId,
     }));
 
     const { error } = await supabase.from('wheelie_results').insert(entries);
@@ -551,7 +552,7 @@ function saveSettings() {
   // Nie zapisujemy już kalibracji
 }
 
-function startTrainingSession() {
+async function startTrainingSession() {
   if (!state.user) {
     showNotification("Musisz być zalogowany", "error");
     return;
@@ -572,14 +573,11 @@ function startTrainingSession() {
   state.isMeasuring = true;
   state.isTrainingSession = true;
   state.sessionStartTime = Date.now();
-  state.sessionId = generateSessionId();
 
-  generateSessionName(state.user.id).then(name => {
-    state.sessionName = name;
-    updateSessionTimer(); // pokaż nazwę sesji od razu
-  });
-
-  
+  state.sessionId = crypto.randomUUID();
+  state.sessionName = await generateSessionName(state.user.id);
+  updateSessionTimer(); // pokaż nazwę sesji od razu
+ 
   // Resetujemy stan pomiarów
   resetMeasurementState();
   
@@ -620,6 +618,7 @@ async function endTrainingSession() {
   // Przygotowanie danych sesji do zapisu
   const endTime = new Date();
   const sessionData = {
+    id: state.sessionId,
     user_id: state.user.id,
     session_name: state.sessionName,
     start_time: new Date(state.sessionStartTime).toISOString(),
@@ -639,15 +638,10 @@ async function endTrainingSession() {
     showNotification("❌ Nie udało się zapisać sesji", "error");
   }
 
-
-  
   // Aktualizacja interfejsu
   elements.sessionBtn.disabled = false;
   elements.endSessionBtn.disabled = true;
   elements.status.textContent = `Sesja zakończona. Czas: ${formatTime(state.sessionDuration)}`;
-  
-  // Możliwość zapisu całej sesji
-  saveSessionData(sessionData);
 }
 
 function updateSessionTimer() {
