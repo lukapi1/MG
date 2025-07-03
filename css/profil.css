@@ -1,94 +1,162 @@
-/* Główne style strony profilu */
-body {
-  font-family: Arial, sans-serif;
-  background: #121212;
-  color: #fff;
-  padding: 20px;
-  margin: 0;
-}
-
-h1 {
-  margin-bottom: 10px;
-  color: #ffffff;
-}
-
-#userInfo {
-  margin-bottom: 20px;
-  font-size: 14px;
-  color: #cccccc;
-}
-
-button {
-  padding: 8px 14px;
-  background: #444;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-button:hover {
-  background: #555;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
-  margin: 20px 0;
-}
-
-li {
-  background: #1e1e1e;
-  margin: 8px 0;
-  padding: 12px;
-  border-radius: 6px;
-  display: flex;
-  justify-content: space-between;
-}
-
+/* Dodatkowe style specyficzne dla profilu */
 .profile-container {
   max-width: 800px;
   margin: 0 auto;
+  padding: 20px;
+}
+
+.stats-section {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin: 25px 0;
+}
+
+.stat-card {
+  flex: 1;
+  background: var(--history-bg);
+  padding: 15px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.stat-card h3 {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+.stat-card p {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.results-tabs {
+  display: flex;
+  margin: 20px 0 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.tab-button {
+  flex: 1;
+  padding: 10px;
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 0.9rem;
+  position: relative;
+}
+
+.tab-button.active {
+  color: var(--primary-color);
+}
+
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--primary-color);
 }
 
 .results-section {
-  margin-top: 30px;
-  background: #1a1a1a;
-  padding: 20px;
+  margin-top: 10px;
+}
+
+#resultsList {
+  margin-top: 15px;
+}
+
+.result-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 15px;
+  margin-bottom: 8px;
+  background: var(--history-bg);
   border-radius: 8px;
 }
 
-.track-name {
+.result-type {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin-bottom: 5px;
+}
+
+.result-value {
   font-weight: bold;
-  color: #4CAF50;
 }
 
-.result-time {
-  color: #2196F3;
+.track-name {
+  color: var(--success-color);
 }
 
-/* Animacje ładowania */
-@keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
+.wheelie-duration {
+  color: var(--primary-color);
 }
 
-.loading {
-    animation: pulse 1.5s infinite;
-    color: #aaa;
-    font-style: italic;
+.wheelie-angle {
+  color: var(--warning-color);
 }
 
-/* Dodatkowe style dla responsywności */
+.result-date {
+  font-size: 0.8rem;
+  opacity: 0.6;
+  margin-top: 5px;
+}
+
 @media (max-width: 600px) {
-  body {
-    padding: 15px;
+  .stats-section {
+    flex-direction: column;
   }
   
-  li {
+  .result-item {
     flex-direction: column;
     gap: 5px;
   }
+}
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.sort-controls label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.sort-controls select {
+  padding: 8px 12px;
+  background: var(--history-bg);
+  color: var(--text-color);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.result-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+}
+
+.result-position {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  min-width: 30px;
+  text-align: center;
+}
+
+.result-details {
+  flex: 1;
 }

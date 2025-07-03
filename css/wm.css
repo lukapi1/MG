@@ -1,4 +1,5 @@
 :root {
+  /* Kolory dla trybu ciemnego */
   --bg-color: #000;
   --text-color: #fff;
   --primary-color: #ff3b30;
@@ -9,6 +10,7 @@
 }
 
 .light-mode {
+  /* Kolory dla trybu jasnego */
   --bg-color: #f2f2f7;
   --text-color: #000;
   --primary-color: #007aff;
@@ -18,6 +20,9 @@
   --history-bg: #d1d1d6;
 }
 
+/* ==================== */
+/* Reset i podstawowe style */
+/* ==================== */
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -37,12 +42,56 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
+/* ==================== */
+/* Nawigacja */
+/* ==================== */
+.nav-links {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+  margin: 0 auto 20px;
+  background: var(--history-bg);
+  border-radius: 12px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-links a {
+  color: var(--text-color);
+  margin: 0 15px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.nav-links a:hover {
+  background: rgba(255,255,255,0.1);
+  transform: translateY(-2px);
+}
+
+.nav-links a:active {
+  transform: translateY(0);
+}
+
+/* Aktywny link */
+.nav-links a.active {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* ==================== */
+/* Layout */
+/* ==================== */
 #container {
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 0 !important; 
+  gap: 0 !important;
 }
 
 .content-wrapper, .history-wrapper {
@@ -52,11 +101,15 @@ body {
   padding-top: 0;
 }
 
+/* ==================== */
+/* Wyświetlacze danych */
+/* ==================== */
 #angle-display {
   font-size: clamp(3rem, 15vw, 5rem);
   font-weight: bold;
   margin: 10px 0;
   color: var(--primary-color);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 #time-display {
@@ -68,14 +121,34 @@ body {
   font-size: clamp(1rem, 4vw, 1.5rem);
   margin: 15px 0;
   min-height: 1.5em;
+  padding: 8px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.1);
 }
 
+/* Wskaźnik sesji */
+#session-time-display {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  background: rgba(0, 0, 0, 0.15);
+  padding: 12px 20px;
+  border-radius: 12px;
+  margin: 15px auto;
+  width: fit-content;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* ==================== */
+/* Pasek postępu */
+/* ==================== */
 #gauge {
   width: 100%;
-  height: 25px;
+  height: 30px;
   background: var(--gauge-bg);
   border-radius: 15px;
-  margin: 15px 0;
+  margin: 20px 0;
   overflow: hidden;
   position: relative;
 }
@@ -97,38 +170,71 @@ body {
   transform: translateX(-50%);
 }
 
+/* ==================== */
+/* Przyciski */
+/* ==================== */
 button {
   background: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 20px;
-  padding: 12px 25px;
+  border-radius: 12px;
+  padding: 12px 20px;
   font-size: 1rem;
-  margin: 8px;
+  font-weight: 500;
+  margin: 6px;
   cursor: pointer;
   flex: 1;
-  min-height: 44px; /* Minimalny rozmiar dotykowy dla iOS */
-  transition: opacity 0.2s;
+  min-height: 42px;
+  transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   opacity: 0.8;
 }
 
-.small-button {
-  padding: 8px 15px;
-  font-size: 0.9rem;
-  background: var(--gauge-bg);
-  min-height: 36px;
+/* Specjalne style przycisków */
+#sessionBtn {
+  background: var(--success-color);
+  flex: 2;
 }
 
+#endSessionBtn {
+  background: var(--warning-color);
+  color: #000;
+}
+
+#saveBtn {
+  background: var(--success-color);
+}
+
+#resetBtn {
+  background: var(--primary-color);
+}
+
+.small-button {
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  min-height: 40px;
+}
+
+/* ==================== */
+/* Historia pomiarów */
+/* ==================== */
 #history {
   width: 100%;
-  border-collapse: collapse; /* Usuwa podwójne obramowania */
+  border-collapse: collapse;
   margin-top: 10px;
   background-color: var(--history-bg);
   border-radius: 10px;
-  overflow: hidden; /* Dla zaokrąglonych rogów */
+  overflow: hidden;
 }
 
 #history th, #history td {
@@ -144,34 +250,17 @@ button:active {
 }
 
 #history tbody tr:last-child td {
-  border-bottom: none; /* Usuwa linię pod ostatnim wierszem */
+  border-bottom: none;
 }
 
-.warning {
-  color: var(--warning-color);
-  font-size: 0.9rem;
-  margin-top: 15px;
-  padding: 0 10px;
-}
-
-.controls-row {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-}
-
-#calibration-value {
-  margin: 8px 0;
-  font-size: 0.9rem;
-  color: var(--warning-color);
-}
-
+/* Alternatywna wersja historii */
 .history-entry {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  margin: 8px 0;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
 }
 
 .history-entry span {
@@ -191,115 +280,54 @@ button:active {
   text-align: center;
 }
 
-/* Kontener główny */
-.content-wrapper {
-  background: var(--history-bg);
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+/* ==================== */
+/* Kontrolki i formularze */
+/* ==================== */
+.controls-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin: 15px 0;
 }
 
-/* Przyciski akcji */
 .controls-row {
-  margin: 15px 0;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
 }
 
-/* Wskaźnik kąta */
-#angle-display {
-  font-size: 5rem;
+#calibration-value {
+  font-weight: bold;
   margin: 10px 0;
-  color: var(--primary-color);
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
-/* Pasek postępu */
-#gauge {
-  height: 30px;
-  margin: 20px 0;
-}
-
-/* Komunikaty statusu */
-#status {
-  min-height: 2em;
   padding: 8px;
-  border-radius: 6px;
-  background: rgba(255,255,255,0.1);
-  margin: 15px 0;
-}
-
-/* Historia pomiarów */
-.history-entry {
-  padding: 12px;
-  margin: 8px 0;
-  background: rgba(255,255,255,0.05);
+  background-color: rgba(255, 255, 255, 0.1);
   border-radius: 8px;
+  color: var(--warning-color);
 }
 
-.nav-links {
-  padding: 10px;
-  text-align: center;
-  background: var(--history-bg);
-}
-.nav-links a {
-  color: var(--text-color);
-  margin: 0 10px;
-  text-decoration: none;
+/* ==================== */
+/* Komunikaty i alerty */
+/* ==================== */
+.warning {
+  color: var(--warning-color);
+  font-size: 0.9rem;
+  margin-top: 15px;
+  padding: 0 10px;
 }
 
+.wheelie-info {
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+/* ==================== */
 /* Animacje */
+/* ==================== */
 @keyframes pulse {
   0% { transform: scale(1); }
   50% { transform: scale(1.05); }
   100% { transform: scale(1); }
-}
-
-.danger-mode {
-  animation: pulse 0.5s infinite;
-}
-
-/* Responsywność */
-@media (max-width: 500px) {
-  #angle-display {
-    font-size: 3.5rem;
-  }
-  
-  button {
-    padding: 10px 15px;
-    font-size: 0.9rem;
-  }
-}
-
-#help-modal {
-  transition: opacity 0.3s;
-  opacity: 0;
-}
-#help-modal.show {
-  opacity: 1;
-  display: block;
-}
-
-.user-info {
-  background: var(--history-bg);
-  padding: 12px;
-  text-align: center;
-  margin-bottom: 15px;
-  border-radius: 8px;
-}
-
-.user-info button {
-  margin-left: 10px;
-  padding: 6px 12px;
-  font-size: 0.9rem;
-}
-
-.wheelie-info {
-  color: #ff3b30;
-  font-weight: bold;
-}
-
-.calibrating {
-  animation: calibrate-pulse 0.5s;
 }
 
 @keyframes calibrate-pulse {
@@ -308,37 +336,46 @@ button:active {
   100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
 }
 
-#session-time-display {
-  font-family: monospace;
-  color: var(--primary-color);
-  background-color: var(--history-bg);
-  padding: 8px;
-  border-radius: 8px;
-  margin: 15px auto;
-  width: fit-content;
+@keyframes dots {
+  0%, 20% { content: "."; }
+  40% { content: ".."; }
+  60%, 100% { content: "..."; }
 }
 
-#endSessionBtn {
-  background-color: var(--warning-color);
-  color: #000;
-}
-
-#sessionBtn {
-  background: var(--success-color);
-  flex: 1; /* Większy niż inne przyciski */
-}
-
-#sessionBtn:disabled {
-  opacity: 0.7;
-  background: var(--gauge-bg);
+.danger-mode {
+  animation: pulse 0.5s infinite;
 }
 
 .calibrating {
-  animation: calibrate-pulse 0.5s infinite;
+  animation: pulse 0.5s infinite;
+  background-color: var(--primary-color) !important;
+  color: white !important;
 }
 
-@keyframes calibrate-pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+.button-pulse {
+  animation: pulse 1.5s infinite;
+}
+
+#saveBtn.saving::after {
+  content: "...";
+  animation: dots 1.5s infinite;
+}
+
+/* ==================== */
+/* Responsywność */
+/* ==================== */
+@media (max-width: 768px) {
+  #angle-display {
+    font-size: 3.5rem;
+  }
+  
+  #session-time-display {
+    font-size: 1.5rem;
+    padding: 10px 16px;
+  }
+  
+  button {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
 }
