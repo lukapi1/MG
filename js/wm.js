@@ -489,9 +489,8 @@ function loadSettings() {
  */
 function showNotification(message, type = 'info') {
   const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
-  notification.innerHTML = `${icon} ${message}`;
   const notification = document.createElement('div');
-  notification.textContent = message;
+  notification.textContent = `${icon} ${message}`;
   notification.style.position = 'fixed';
   notification.style.bottom = '20px';
   notification.style.left = '50%';
@@ -510,6 +509,7 @@ function showNotification(message, type = 'info') {
     document.body.removeChild(notification);
   }, 4000);
 }
+
 
 /**
  * Zapisuje ustawienia
