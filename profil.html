@@ -6,39 +6,35 @@
   <title>motoGYM – Profil</title>
   <link rel="stylesheet" href="./css/wm.css"> <!-- Używamy wspólnego CSS -->
   <link rel="stylesheet" href="./css/profil.css"> <!-- Dodatkowe style specyficzne dla profilu -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
   <div class="nav-links">
     <a href="index.html">🏠 Home</a>
     <a href="timer.html">⏱️ Timer</a>
     <a href="wm.html">🤸‍♂️ WheelieMeter</a>
-    <a href="profil.html" class="active">👤 Profil</a>
   </div>
 
-  <div class="sort-controls">
-    <label for="sortSelect">Sortuj według:</label>
-    <select id="sortSelect">
-      <option value="date-desc">Data (najnowsze)</option>
-      <option value="date-asc">Data (najstarsze)</option>
-      <option value="duration-desc">Czas trwania (najdłuższe)</option>
-      <option value="duration-asc">Czas trwania (najkrótsze)</option>
-      <option value="track">Trasa (tylko timer)</option>
-    </select>
-  </div>
+  <div class="sort-controls-container">
+    <div class="sort-controls">
+      <label for="sortSelect"><i class="fas fa-sort"></i> Sortuj:</label>
+      <select id="sortSelect">
+        <option value="date-desc">Data (najnowsze)</option>
+        <option value="date-asc">Data (najstarsze)</option>
+        <option value="duration-desc">Czas (najdłuższe)</option>
+        <option value="duration-asc">Czas (najkrótsze)</option>
+        <option value="track">Trasa</option>
+      </select>
+    </div>
+</div>
 
   <div class="profile-container">
     <h1>Twój profil</h1>
-    <div id="userInfo">Ładowanie...</div>
-    <button id="logoutBtn">Wyloguj się</button>
 
     <div class="stats-section">
       <div class="stat-card">
-        <h3>Łączna liczba wyników</h3>
-        <p id="totalResults">0</p>
-      </div>
-      <div class="stat-card">
-        <h3>Najlepszy czas</h3>
-        <p id="bestTime">-</p>
+        <h3>Łączna liczba wheelie</h3>
+        <p id="totalWheelies">0</p>
       </div>
       <div class="stat-card">
         <h3>Najdłuższe wheelie</h3>
@@ -47,14 +43,18 @@
     </div>
 
     <div class="results-tabs">
-      <button class="tab-button active" data-tab="all">Wszystkie</button>
-      <button class="tab-button" data-tab="timer">Czasy</button>
+      <button class="tab-button" data-tab="timer">Gymkhana</button>
       <button class="tab-button" data-tab="wheelie">Wheelie</button>
     </div>
 
     <div class="results-section">
       <p id="resultsStatus" class="loading">Ładowanie wyników...</p>
       <ul id="resultsList"></ul>
+    </div>
+
+    <div class="profile-footer">
+      <div id="userInfo">Ładowanie...</div>
+      <button id="logoutBtn">Wyloguj się</button>
     </div>
   </div>
 
