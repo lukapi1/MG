@@ -33,6 +33,7 @@ const state = {
   sessionDuration: 0,
   isCalibrating: false,
   hasBeenCalibrated: false,
+  sessionName: "",
 };
 
 /**
@@ -41,6 +42,36 @@ const state = {
 function generateSessionId() {
   return crypto.randomUUID();
 }
+
+async function generateSessionName(userId) {
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+  // Pobierz liczbę sesji użytkownika danego dnia
+  const { data, error } = await supabase
+    .from('wheelie_results')
+    .select('session_name', { count: 'exact', head: false })
+    .eq('user_id', userId)
+    .gte('created_at', `${today}T00:00:00`)
+    .lte('created_at', `${today}T23:59:59`);
+
+  if (error) {
+    console.error("Błąd przy sprawdzaniu liczby sesji:", error);
+    return `${today} #?`;
+  }
+
+  // Zlicz unikalne nazwy sesji (może być wiele wpisów w 1 sesji)
+  const sessionNumbers = new Set();
+  data.forEach(entry => {
+    const match = entry.session_name?.match(/#(\d+)$/);
+    if (match) {
+      sessionNumbers.add(parseInt(match[1], 10));
+    }
+  });
+
+  const nextNumber = sessionNumbers.size + 1;
+  return `${today} #${nextNumber}`;
+}
+
 
 /**
  * Referencje do elementów DOM
@@ -216,6 +247,7 @@ async function saveSession() {
       avg_angle: parseFloat(m.avgAngle.toFixed(1)),
       duration: parseFloat(m.duration.toFixed(2)),
       max_angle: parseFloat(m.angle.toFixed(1)),
+      session_name: state.sessionName,
       created_at: new Date().toISOString()
     }));
 
@@ -541,6 +573,10 @@ function startTrainingSession() {
   state.isTrainingSession = true;
   state.sessionStartTime = Date.now();
   state.sessionId = generateSessionId();
+
+  generateSessionName(state.user.id).then(name => {
+    state.sessionName = name;
+  });
   
   // Resetujemy stan pomiarów
   resetMeasurementState();
