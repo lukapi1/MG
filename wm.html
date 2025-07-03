@@ -8,6 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Wheelie Meter</title>
   <link rel="stylesheet" href="./css/wm.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
   <div class="nav-links">
@@ -16,7 +17,9 @@
     <a href="profil.html">👤 Profil</a>
   </div>
 
-  <div id="session-time-display" style="font-size: 1.2rem; margin: 10px 0;">Czas sesji: 00:00:00</div>
+  <div id="session-time-display" class="session-timer">
+    SESJA 00:00:00
+  </div>
 
   <div id="container">
     <div class="content-wrapper">
@@ -32,22 +35,23 @@
       </div>
       
       <div id="calibration-value">Kalibracja: 0°</div>
-      
-      <div class="controls-row">
-        <button id="calibrateBtn" class="small-button">KALIBRUJ</button>
-        <button id="themeBtn" class="small-button">TRYB JASNY</button>
-      </div>
 
-      <div class="controls-row">
-        <button id="sessionBtn">START SESJI</button>
-        <button id="endSessionBtn" class="small-button" disabled>KONIEC SESJI</button>
-      </div>
-      <div class="controls-row">
-        <button id="resetBtn" disabled>RESET</button>
-        <button id="saveBtn" disabled>ZAPISZ</button>
-      </div>
-
-      
+      <div class="controls-grid">
+        <div class="controls-row">
+          <button id="calibrateBtn" class="small-button">🎯 KALIBRUJ</button>
+          <button id="themeBtn" class="small-button">🌓 TRYB</button>
+        </div>
+  
+        <div class="controls-row">
+          <button id="sessionBtn">▶ START SESJI</button>
+          <button id="endSessionBtn" class="small-button" disabled>⏹ STOP</button>
+        </div>
+  
+        <div class="controls-row">
+          <button id="resetBtn" disabled>↻ RESET</button>
+          <button id="saveBtn" disabled>💾 ZAPISZ</button>
+        </div>
+      </div>      
     </div>
     
     <div class="history-wrapper">
