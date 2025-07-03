@@ -193,7 +193,7 @@ function resetSession() {
     // Zresetuj interfejs
     elements.history.innerHTML = "";
     elements.timeDisplay.textContent = "0.00s";
-    elements.sessionTimeDisplay.textContent = "Czas sesji: 00:00:00";
+    elements.sessionTimeDisplay.textContent = "SESJA: 00:00:00";
     elements.sessionBtn.disabled = false;
     elements.endSessionBtn.disabled = true;
     elements.resetBtn.disabled = true;
@@ -576,7 +576,9 @@ function startTrainingSession() {
 
   generateSessionName(state.user.id).then(name => {
     state.sessionName = name;
+    updateSessionTimer(); // pokaż nazwę sesji od razu
   });
+
   
   // Resetujemy stan pomiarów
   resetMeasurementState();
@@ -605,7 +607,7 @@ function resetMeasurementState() {
   state.currentAngle = 0;
 }
 
-function endTrainingSession() {
+async function endTrainingSession() {
   if (!state.isTrainingSession) return;
 
   // Zatrzymanie timera sesji
@@ -616,13 +618,28 @@ function endTrainingSession() {
   state.isTrainingSession = false;
   
   // Przygotowanie danych sesji do zapisu
+  const endTime = new Date();
   const sessionData = {
+    user_id: state.user.id,
+    session_name: state.sessionName,
+    start_time: new Date(state.sessionStartTime).toISOString(),
+    end_time: endTime.toISOString(),
     duration: state.sessionDuration,
-    startTime: new Date(state.sessionStartTime),
-    endTime: new Date(),
-    measurementsCount: state.measurements.length,
-    maxAngle: Math.max(...state.measurements.map(m => m.angle))
+    measurements_count: state.measurements.length,
+    max_angle: Math.max(...state.measurements.map(m => m.angle)),
+    created_at: endTime.toISOString()
   };
+
+  try {
+    const { error } = await supabase.from('training_sessions').insert([sessionData]);
+    if (error) throw error;
+    showNotification("✅ Sesja zapisana w training_sessions", "success");
+  } catch (err) {
+    console.error("Błąd zapisu sesji:", err);
+    showNotification("❌ Nie udało się zapisać sesji", "error");
+  }
+
+
   
   // Aktualizacja interfejsu
   elements.sessionBtn.disabled = false;
@@ -635,7 +652,7 @@ function endTrainingSession() {
 
 function updateSessionTimer() {
   state.sessionDuration = Math.floor((Date.now() - state.sessionStartTime) / 1000);
-  elements.sessionTimeDisplay.innerHTML = `Czas sesji: ${formatTime(state.sessionDuration)}`;
+  elements.sessionTimeDisplay.innerHTML = `${state.sessionName || 'SESJA'}: ${formatTime(state.sessionDuration)}`;
 }
 
 function formatTime(seconds) {
@@ -643,32 +660,6 @@ function formatTime(seconds) {
   const mins = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
   return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-}
-
-async function saveSessionData(sessionData) {
-  if (!state.user) {
-    showNotification("Musisz być zalogowany aby zapisać sesję", "error");
-    return;
-  }
-
-  try {
-    const { error } = await supabase.from('training_sessions').insert([{
-      user_id: state.user.id,
-      session_id: state.sessionId,
-      duration: sessionData.duration,
-      start_time: sessionData.startTime.toISOString(),
-      end_time: sessionData.endTime.toISOString(),
-      measurements_count: sessionData.measurementsCount,
-      max_angle: sessionData.maxAngle
-    }]);
-
-    if (error) throw error;
-
-    showNotification("Sesja zapisana pomyślnie", "success");
-  } catch (error) {
-    console.error("Błąd zapisu sesji:", error);
-    showNotification("Błąd podczas zapisywania sesji", "error");
-  }
 }
 
 // Inicjalizacja aplikacji
