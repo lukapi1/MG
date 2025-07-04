@@ -152,7 +152,7 @@ export function initializeProfile() {
   }
 
   // Obliczanie statystyk
-  function calculateStats(results) {
+  async function calculateStats(results) {
   // Filtruj tylko wyniki wheelie (te które mają duration)
   const wheelieResults = results.filter(r => r.duration);
   
@@ -179,7 +179,26 @@ export function initializeProfile() {
   } else {
     bestWheelie.textContent = "-";
   }
+
+  // Pobierz dane sesji treningowych
+  try {
+    const { data: sessions, error } = await supabase
+      .from('training_sessions')
+      .select('*')
+      .eq('user_id', currentSession.user.id);
+
+    if (!error && sessions) {
+      // Liczba sesji treningowych
+      document.getElementById('totalTrainingSessions').textContent = sessions.length;
+
+      // Łączny czas sesji treningowych
+      const totalSessionTime = sessions.reduce((sum, session) => sum + (session.duration || 0), 0);
+      document.getElementById('totalTrainingTime').textContent = formatTime(totalSessionTime);
+    }
+  } catch (error) {
+    console.error("Błąd pobierania sesji treningowych:", error);
   }
+}
 
   // Funkcja do wyświetlania sesji
   async function displaySessions(session) {
@@ -272,7 +291,7 @@ export function initializeProfile() {
   function formatTime(seconds) {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
+    const secs = Math.floor(seconds % 60);
     return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   }
 
@@ -328,7 +347,7 @@ export function initializeProfile() {
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
       // Obliczenie statystyk
-      calculateStats(allResults);
+      await calculateStats(allResults);
 
       // Wyświetlenie wyników
       filterResults();
