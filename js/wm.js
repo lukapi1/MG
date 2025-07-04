@@ -46,30 +46,38 @@ function generateSessionId() {
 async function generateSessionName(userId) {
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
-  // Pobierz liczbę sesji użytkownika danego dnia
+  // Pobierz wszystkie unikalne nazwy sesji użytkownika danego dnia
   const { data, error } = await supabase
     .from('wheelie_results')
-    .select('session_name', { count: 'exact', head: false })
+    .select('session_name')
     .eq('user_id', userId)
     .gte('created_at', `${today}T00:00:00`)
     .lte('created_at', `${today}T23:59:59`);
 
   if (error) {
     console.error("Błąd przy sprawdzaniu liczby sesji:", error);
-    return `${today} #?`;
+    return `${today} #1`; // Domyślnie zwracamy #1 zamiast #?
   }
 
-  // Zlicz unikalne nazwy sesji (może być wiele wpisów w 1 sesji)
-  const sessionNumbers = new Set();
+  // Zbierz wszystkie numery sesji
+  const sessionNumbers = [];
   data.forEach(entry => {
-    const match = entry.session_name?.match(/#(\d+)$/);
-    if (match) {
-      sessionNumbers.add(parseInt(match[1], 10));
+    if (entry.session_name) {
+      const match = entry.session_name.match(/#(\d+)$/);
+      if (match) {
+        sessionNumbers.push(parseInt(match[1], 10));
+      }
     }
   });
 
-  const nextNumber = sessionNumbers.size + 1;
-  return `${today} #${nextNumber}`;
+  // Jeśli nie znaleziono żadnych sesji, zaczynamy od 1
+  if (sessionNumbers.length === 0) {
+    return `${today} #1`;
+  }
+
+  // Znajdź najwyższy numer sesji i zwiększ o 1
+  const maxNumber = Math.max(...sessionNumbers);
+  return `${today} #${maxNumber + 1}`;
 }
 
 
@@ -257,7 +265,7 @@ async function saveSession() {
     if (error) throw error;
 
     elements.status.textContent = `✅ Zapisano ${entries.length} wyników (sesja ${sessionId.slice(0, 8)}...)`;
-    showNotification(`Zapisano ${entries.length} wyników ✅`, 'success');
+    showNotification(`Zapisano ${entries.length} wyników`, 'success');
 
     // Wyłączenie dalszego zapisu
     state.unsavedResults = null;
