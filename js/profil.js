@@ -12,6 +12,8 @@ export function initializeProfile() {
   const tabButtons = document.querySelectorAll(".tab-button");
   const sortSelect = document.getElementById("sortSelect");
   const sessionsList = document.getElementById("sessionsList");
+  const totalSessions = document.getElementById("totalSessions");
+  const totalAirTime = document.getElementById("totalAirTime");
   
   // Zmienne stanu
   let currentTab = "timer";
@@ -151,20 +153,32 @@ export function initializeProfile() {
 
   // Obliczanie statystyk
   function calculateStats(results) {
-    // Wheelie results only
-    const wheelieResults = results.filter(r => r.duration);
-    
-    // Liczba wheelie
-    totalWheelies.textContent = wheelieResults.length;
+  // Filtruj tylko wyniki wheelie (te które mają duration)
+  const wheelieResults = results.filter(r => r.duration);
+  
+  // Liczba dni z wheelie (unikalne daty)
+  const wheelieDays = {};
+  wheelieResults.forEach(result => {
+    const date = new Date(result.created_at).toDateString();
+    wheelieDays[date] = true;
+  });
+  totalSessions.textContent = Object.keys(wheelieDays).length;
 
-    // Najdłuższe wheelie
-    if (wheelieResults.length > 0) {
-      const best = wheelieResults.reduce((max, current) => 
-        current.duration > max.duration ? current : max);
-      bestWheelie.textContent = `${best.duration.toFixed(2)}s (${best.max_angle || best.angle || '0'}°)`;
-    } else {
-      bestWheelie.textContent = "-";
-    }
+  // Liczba wheelie
+  totalWheelies.textContent = wheelieResults.length;
+
+  // Całkowity czas w powietrzu
+  const totalDuration = wheelieResults.reduce((sum, current) => sum + (current.duration || 0), 0);
+  totalAirTime.textContent = totalDuration.toFixed(2) + "s";
+
+  // Najdłuższe wheelie
+  if (wheelieResults.length > 0) {
+    const best = wheelieResults.reduce((max, current) => 
+      current.duration > max.duration ? current : max);
+    bestWheelie.textContent = `${best.duration.toFixed(2)}s (${best.max_angle || best.angle || '0'}°)`;
+  } else {
+    bestWheelie.textContent = "-";
+  }
   }
 
   // Funkcja do wyświetlania sesji
