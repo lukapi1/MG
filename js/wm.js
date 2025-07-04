@@ -91,7 +91,6 @@ const elements = {
   calibrationValue: document.getElementById('calibration-value'),
   sessionBtn: document.getElementById('sessionBtn'),
   endSessionBtn: document.getElementById('endSessionBtn'),
-  saveAndEndBtn: document.getElementById('saveAndEndBtn'), 
   sessionTimeDisplay: document.getElementById('session-time-display')
 };
 
@@ -114,21 +113,15 @@ async function init() {
 
   // Inicjalizacja przycisków
   elements.resetBtn.addEventListener('click', resetSession);
+  elements.saveBtn.addEventListener('click', saveSession);
   elements.calibrateBtn.addEventListener('click', calibrate);
   elements.themeBtn.addEventListener('click', toggleTheme);
   elements.logoutBtn.addEventListener('click', handleLogout); 
   elements.sessionBtn.addEventListener('click', startTrainingSession);
-
-  elements.saveAndEndBtn.addEventListener('click', async () => {
-  await endTrainingSession();   // zakończ sesję
-  await saveSession();         // zapisz pomiary
-  });
+  elements.endSessionBtn.addEventListener('click', endTrainingSession);
 
   elements.resetBtn.disabled = true;
   elements.saveBtn.disabled = true;
-
-  elements.endSessionBtn.style.display = 'none';
-  elements.saveBtn.style.display = 'none';
 
   loadSettings();
 
@@ -462,7 +455,7 @@ function endWheelie() {
   state.wheelieAngles = [];
   
   elements.status.textContent = `Wheelie: ${duration.toFixed(2)}s (max: ${state.maxAngle.toFixed(1)}°, avg: ${avgAngle.toFixed(1)}°)`;
-  elements.saveAndEndBtn.disabled = false;
+  elements.saveBtn.disabled = false;
 
   // Krótka blokada przed następnym wheelie
   state.isMeasuring = false;
