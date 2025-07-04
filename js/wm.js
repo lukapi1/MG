@@ -24,7 +24,6 @@ const state = {
   calibrationOffset: 0,
   measurements: [],
   isLightMode: false,
-  unsavedResults: null,
   wheelieAngles: [],
   sessionId: crypto.randomUUID(),
   isTrainingSession: false,
@@ -92,7 +91,6 @@ const elements = {
   status: document.getElementById('status'),
   gaugeFill: document.getElementById('gauge-fill'),
   resetBtn: document.getElementById('resetBtn'),
-  saveBtn: document.getElementById('saveBtn'),
   calibrateBtn: document.getElementById('calibrateBtn'),
   themeBtn: document.getElementById('themeBtn'),
   history: document.getElementById('history'),
@@ -128,7 +126,6 @@ async function init() {
   elements.endSessionBtn.addEventListener('click', endTrainingSession);
 
   elements.resetBtn.disabled = true;
-  elements.saveBtn.disabled = true;
 
   loadSettings();
 
@@ -394,7 +391,6 @@ function endWheelie() {
   state.wheelieAngles = [];
   
   elements.status.textContent = `Wheelie: ${duration.toFixed(2)}s (max: ${state.maxAngle.toFixed(1)}°, avg: ${avgAngle.toFixed(1)}°)`;
-  elements.saveBtn.disabled = false;
 
   // Krótka blokada przed następnym wheelie
   state.isMeasuring = false;
@@ -523,7 +519,6 @@ async function startTrainingSession() {
   // Aktualizujemy interfejs
   elements.sessionBtn.disabled = true;
   elements.resetBtn.disabled = false;
-  elements.saveBtn.disabled = true;
   elements.status.textContent = "Czekam na wheelie...";
   
   // Rozpoczynamy timer sesji
