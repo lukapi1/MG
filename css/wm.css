@@ -295,6 +295,7 @@ button:active {
   justify-content: center;
   gap: 6px;
   width: 100%;
+  margin-bottom: 8px;
 }
 
 #calibration-value {
@@ -378,4 +379,34 @@ button:active {
     padding: 10px 15px;
     font-size: 0.9rem;
   }
+}
+
+.session-summary {
+  background: rgba(255,255,255,0.1);
+  padding: 15px;
+  border-radius: 12px;
+  margin: 15px 0;
+  text-align: left;
+}
+
+.session-summary h3 {
+  margin-top: 0;
+  color: var(--primary-color);
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding-bottom: 8px;
+}
+
+.session-summary p {
+  margin: 8px 0;
+}
+
+#endSessionBtn {
+  background: var(--warning-color);
+  color: #000;
+  font-weight: bold;
+}
+
+#resetBtn.small-button {
+  background: var(--primary-color);
+  color: white;
 }
