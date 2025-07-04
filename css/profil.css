@@ -235,3 +235,88 @@
 .result-details {
   flex: 1;
 }
+
+#resultsStatus {
+  display: none; /* Domyślnie ukryty */
+  text-align: center;
+  padding: 20px;
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+#resultsStatus.loading {
+  display: block;
+}
+
+/* Style dla listy sesji */
+.sessions-list {
+  width: 100%;
+  margin-top: 15px;
+}
+
+.session-item {
+  background: var(--history-bg);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 10px;
+}
+
+.session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.session-name {
+  font-weight: bold;
+  color: var(--primary-color);
+  flex: 2;
+}
+
+.session-date {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  text-align: right;
+  flex: 1;
+}
+
+.session-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  text-align: center;
+}
+
+.session-stat {
+  padding: 8px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+}
+
+.session-stat-label {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  margin-bottom: 5px;
+}
+
+.session-stat-value {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+@media (max-width: 600px) {
+  .session-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .session-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .session-date {
+    text-align: left;
+  }
+}
