@@ -121,7 +121,6 @@ async function init() {
 
   // Inicjalizacja przycisków
   elements.resetBtn.addEventListener('click', resetSession);
-  elements.saveBtn.addEventListener('click', saveSession);
   elements.calibrateBtn.addEventListener('click', calibrate);
   elements.themeBtn.addEventListener('click', toggleTheme);
   elements.logoutBtn.addEventListener('click', handleLogout); 
@@ -205,78 +204,10 @@ function resetSession() {
     elements.sessionBtn.disabled = false;
     elements.endSessionBtn.disabled = true;
     elements.resetBtn.disabled = true;
-    elements.saveBtn.disabled = true;
     elements.status.textContent = "Gotowy do pomiaru. Wykonaj kalibrację.";
     elements.angleDisplay.textContent = "0°";
     elements.gaugeFill.style.width = "0%";
     updateCalibrationDisplay();
-  }
-}
-
-/**
- * Zapisuje wyniki do bazy danych
- */
-async function saveSession() {
-  if (!state.user?.id) {
-    showNotification("Błąd autoryzacji", "error");
-    return;
-  }
-  
-  if (state.measurements.some(m => m.angle > 90 || m.angle < 0)) {
-    showNotification("Nieprawidłowe wartości kątów", "error");
-    return;
-  }
-
-  if (!state.user) {
-    alert("Musisz być zalogowany, aby zapisywać wyniki!");
-    return;
-  }
-
-  if (!state.measurements || state.measurements.length === 0) {
-    alert("Brak wyników do zapisania!");
-    return;
-  }
-
-  if (!state.unsavedResults) {
-    alert("Te wyniki już zostały zapisane.");
-    return;
-  }
-  elements.saveBtn.classList.add('saving');
-  // Po zapisie:
-  elements.saveBtn.classList.remove('saving');
-  elements.saveBtn.disabled = true;
-  elements.status.textContent = "Zapisywanie do bazy...";
-
-  try {
-    const sessionId = state.sessionId;
-    const entries = state.measurements.map(m => ({
-      user_id: state.user.id,
-      angle: parseFloat(m.angle.toFixed(1)),
-      avg_angle: parseFloat(m.avgAngle.toFixed(1)),
-      duration: parseFloat(m.duration.toFixed(2)),
-      max_angle: parseFloat(m.angle.toFixed(1)),
-      session_name: state.sessionName,
-      created_at: new Date().toISOString(),
-      session_id: state.sessionId,
-    }));
-
-    const { error } = await supabase.from('wheelie_results').insert(entries);
-
-    if (error) throw error;
-
-    elements.status.textContent = `✅ Zapisano ${entries.length} wyników (sesja ${sessionId.slice(0, 8)}...)`;
-    showNotification(`Zapisano ${entries.length} wyników`, 'success');
-
-    // Wyłączenie dalszego zapisu
-    state.unsavedResults = null;
-    state.measurements = [];
-    elements.saveBtn.disabled = true;
-    elements.resetBtn.disabled = true;
-  } catch (error) {
-    elements.status.textContent = `❌ Błąd zapisu: ${error.message}`;
-    showNotification("❌ Błąd zapisu do bazy!", 'error');
-    console.error("Błąd zapisu:", error);
-    elements.saveBtn.disabled = false;
   }
 }
 
@@ -616,40 +547,58 @@ function resetMeasurementState() {
 async function endTrainingSession() {
   if (!state.isTrainingSession) return;
 
-  // Zatrzymanie timera sesji
+  // 1. Zatrzymanie timera i pomiarów
   clearInterval(state.sessionTimer);
-  
-  // Zatrzymanie pomiarów
   state.isMeasuring = false;
   state.isTrainingSession = false;
-  
-  // Przygotowanie danych sesji do zapisu
-  const endTime = new Date();
-  const sessionData = {
-    id: state.sessionId,
-    user_id: state.user.id,
-    session_name: state.sessionName,
-    start_time: new Date(state.sessionStartTime).toISOString(),
-    end_time: endTime.toISOString(),
-    duration: state.sessionDuration,
-    measurements_count: state.measurements.length,
-    max_angle: Math.max(...state.measurements.map(m => m.angle)),
-    created_at: endTime.toISOString()
-  };
 
-  try {
-    const { error } = await supabase.from('training_sessions').insert([sessionData]);
-    if (error) throw error;
-    showNotification("✅ Sesja zapisana w training_sessions", "success");
-  } catch (err) {
-    console.error("Błąd zapisu sesji:", err);
-    showNotification("❌ Nie udało się zapisać sesji", "error");
+  // 2. Zapis wyników jeśli są
+  if (state.measurements.length > 0) {
+    elements.status.textContent = "Zapisywanie wyników...";
+    
+    try {
+      // Zapisz pomiary
+      const entries = state.measurements.map(m => ({
+        user_id: state.user.id,
+        angle: parseFloat(m.angle.toFixed(1)),
+        avg_angle: parseFloat(m.avgAngle.toFixed(1)),
+        duration: parseFloat(m.duration.toFixed(2)),
+        max_angle: parseFloat(m.angle.toFixed(1)),
+        session_name: state.sessionName,
+        created_at: new Date().toISOString(),
+        session_id: state.sessionId,
+      }));
+
+      await supabase.from('wheelie_results').insert(entries);
+
+      // Zapisz podsumowanie sesji
+      const sessionData = {
+        id: state.sessionId,
+        user_id: state.user.id,
+        session_name: state.sessionName,
+        start_time: new Date(state.sessionStartTime).toISOString(),
+        end_time: new Date().toISOString(),
+        duration: state.sessionDuration,
+        measurements_count: entries.length,
+        max_angle: Math.max(...entries.map(m => m.angle)),
+      };
+
+      await supabase.from('training_sessions').insert([sessionData]);
+      
+      // Pokaż podsumowanie
+      showSessionSummary();
+      showNotification("✅ Sesja i wyniki zapisane", "success");
+    } catch (error) {
+      console.error("Błąd zapisu:", error);
+      showNotification("❌ Błąd zapisu sesji", "error");
+    }
   }
 
-  // Aktualizacja interfejsu
+  // 3. Aktualizacja UI
   elements.sessionBtn.disabled = false;
   elements.endSessionBtn.disabled = true;
-  elements.status.textContent = `Sesja zakończona. Czas: ${formatTime(state.sessionDuration)}`;
+  elements.resetBtn.disabled = false;
+  elements.status.textContent = `Sesja zakończona (${state.measurements.length} wyników)`;
 }
 
 function updateSessionTimer() {
